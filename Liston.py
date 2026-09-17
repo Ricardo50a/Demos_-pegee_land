@@ -19,6 +19,11 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 
+# 👇 AÑADE ESTAS 3 LÍNEAS
+@app.context_processor
+def inject_now():
+    return {'now': datetime.now()}
+
 # ============================================
 # CONEXIÓN A SUPABASE (Usando variables individuales)
 # ============================================
