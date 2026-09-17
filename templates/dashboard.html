@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MiContaBeta Pro</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body>
+
+  <!-- ===================== HEADER ===================== -->
+  <header class="app-header">
+    <h1>MiContaBeta <span>Pro</span></h1>
+    <button class="btn-logout" title="Salir">⎋</button>
+  </header>
+
+  <!-- ===================== FLASH MESSAGES ===================== -->
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <div class="toast-container">
+        {% for msg in messages %}
+          <div class="toast {{ 'toast-success' if '✅' in msg else 'toast-error' }}">
+            {{ msg }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- ===================== VISTA: INICIO ===================== -->
+  <main id="view-inicio" class="view active">
+    <section class="kpi-grid">
+      <div class="kpi-card kpi-income">
+        <span class="kpi-label">Ingresos totales</span>
+        <span class="kpi-value">$ {{ "{:,.2f}".format(total_ingresos) }}</span>
+      </div>
+      <div class="kpi-card kpi-expense">
+        <span class="kpi-label">Egresos totales</span>
+        <span class="kpi-value">$ {{ "{:,.2f}".format(total_egresos) }}</span>
+      </div>
+      <div class="kpi-card kpi-balance {{ 'positive' if balance_total >= 0 else 'negative' }}">
+        <span class="kpi-label">Balance general</span>
+        <span class="kpi-value">$ {{ "{:,.2f}".format(balance_total) }}</span>
+      </div>
+    </section>
+
+    <section class="quick-actions">
+      <a href="{{ url_for('exportar_excel') }}" class="btn-secondary">📊 Exportar Excel</a>
+      <a href="{{ url_for('exportar_pdf') }}" class="btn-secondary">📄 Exportar PDF</a>
+    </section>
+  </main>
+
+  <!-- ===================== VISTA: MOVIMIENTOS ===================== -->
+  <main id="view-movimientos" class="view">
+    <div class="search-bar">
+      <input type="search" id="search-input" placeholder="Buscar por factura o descripción...">
+    </div>
+
+    <div class="filters-row">
+      <select id="filter-tipo">
+        <option value="">Todos los tipos</option>
+        <option value="Ingreso">Solo ingresos</option>
+        <option value="Egreso">Solo egresos</option>
+      </select>
+      <form method="GET" action="{{ url_for('cierre_mensual') }}" class="inline-form">
+        <input type="month" name="mes" required>
+        <button type="submit" class="btn-filter">Filtrar mes</button>
+      </form>
+    </div>
+
+    <table class="custom-table" id="tx-table">
+      <thead>
+        <tr>
+          <th>Factura</th>
+          <th>Descripción</th>
+          <th>Tipo</th>
+          <th class="text-right">Monto</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tx-tbody">
+        {% for t in transacciones %}
+        <tr data-factura="{{ t.factura_numero|lower }}" data-desc="{{ t.descripcion|lower }}" data-tipo="{{ t.tipo }}">
+          <td>{{ t.factura_numero }}</td>
+          <td>{{ t.descripcion }}</td>
+          <td>
+            <span class="badge badge-{{ 'income' if t.tipo == 'Ingreso' else 'expense' }}">
+              {{ t.tipo }}
+            </span>
+          </td>
+          <td class="amount {{ 'income' if t.tipo == 'Ingreso' else 'expense' }}">
+            $ {{ "{:,.2f}".format(t.monto) }}
+          </td>
+          <td class="text-right">
+            <form method="POST" action="{{ url_for('eliminar', id=t.id) }}"
+                  onsubmit="return confirm('¿Eliminar esta transacción?');">
+              <button type="submit" class="btn-icon-danger">🗑️</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <button id="btn-load-more" class="btn-secondary hidden">Cargar más</button>
+  </main>
+
+  <!-- ===================== VISTA: CIERRE / AUDITORÍA ===================== -->
+  <main id="view-cierre" class="view">
+    {% if balance_mensual %}
+    <section class="kpi-grid">
+      <div class="kpi-card kpi-income">
+        <span class="kpi-label">Ingresos {{ balance_mensual.mes }}</span>
+        <span class="kpi-value">$ {{ "{:,.2f}".format(balance_mensual.ingresos) }}</span>
+      </div>
+      <div class="kpi-card kpi-expense">
+        <span class="kpi-label">Egresos {{ balance_mensual.mes }}</span>
+        <span class="kpi-value">$ {{ "{:,.2f}".format(balance_mensual.egresos) }}</span>
+      </div>
+      <div class="kpi-card kpi-balance">
+        <span class="kpi-label">Balance del mes</span>
+        <span class="kpi-value">$ {{ "{:,.2f}".format(balance_mensual.balance) }}</span>
+      </div>
+    </section>
+    {% endif %}
+
+    <h3 class="section-title">Auditoría reciente ({{ total_auditoria }})</h3>
+    <ul class="audit-list">
+      {% for a in auditoria %}
+      <li class="audit-item">
+        <span class="audit-badge">{{ a.accion }}</span>
+        <span class="audit-desc">Tx #{{ a.transaccion_id }}</span>
+        <time>{{ a.fecha.strftime('%d/%m %H:%M') }}</time>
+      </li>
+      {% endfor %}
+    </ul>
+  </main>
+
+  <!-- ===================== BOTTOM NAV ===================== -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-target="view-inicio">🏠<span>Inicio</span></button>
+    <button class="nav-btn" data-target="view-movimientos">📋<span>Movs</span></button>
+    <button class="nav-btn fab" id="open-fab">＋</button>
+    <button class="nav-btn" data-target="view-cierre">📊<span>Cierre</span></button>
+    <button class="nav-btn" id="open-import">⬆️<span>Importar</span></button>
+  </nav>
+
+  <!-- ===================== BOTTOM SHEET: NUEVA TRANSACCIÓN ===================== -->
+  <div class="sheet-backdrop" id="sheet-backdrop"></div>
+
+  <div class="bottom-sheet" id="sheet-nueva">
+    <div class="sheet-header">
+      <h3>Nueva transacción</h3>
+      <button class="btn-close" data-close-sheet>✕</button>
+    </div>
+    <form method="POST" action="{{ url_for('agregar') }}" class="transaction-form">
+      <div class="toggle-container">
+        <input type="radio" id="t-income" name="tipo" value="Ingreso" checked>
+        <label for="t-income" class="toggle-label income">Ingreso</label>
+        <input type="radio" id="t-expense" name="tipo" value="Egreso">
+        <label for="t-expense" class="toggle-label expense">Egreso</label>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="factura_numero">Nro. de factura</label>
+          <input type="text" id="factura_numero" name="factura_numero" required>
+        </div>
+        <div class="form-group">
+          <label for="fecha">Fecha</label>
+          <input type="date" id="fecha" name="fecha"
+                 value="{{ datetime.now().strftime('%Y-%m-%d') }}">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="descripcion">Descripción</label>
+        <input type="text" id="descripcion" name="descripcion" required>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="monto">Monto ($)</label>
+          <input type="number" id="monto" name="monto" step="0.01" min="0.01" required>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-primary">Guardar asiento</button>
+    </form>
+  </div>
+
+  <!-- ===================== BOTTOM SHEET: IMPORTAR ===================== -->
+  <div class="bottom-sheet" id="sheet-import">
+    <div class="sheet-header">
+      <h3>Importar Excel</h3>
+      <button class="btn-close" data-close-sheet>✕</button>
+    </div>
+    <form method="POST" action="{{ url_for('importar_excel') }}"
+          enctype="multipart/form-data" class="transaction-form">
+      <div class="form-group">
+        <label for="archivo_excel">Archivo (.xlsx)</label>
+        <input type="file" id="archivo_excel" name="archivo_excel"
+               accept=".xlsx,.xls" required>
+      </div>
+      <p class="hint">Columnas requeridas: factura_numero, descripcion, monto, tipo</p>
+      <button type="submit" class="btn-primary">Subir e importar</button>
+    </form>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
