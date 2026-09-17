@@ -3,6 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- ✅ NUEVO: Le dice a Google que NO traduzca la página -->
+  <meta name="google" content="notranslate">
+  <title>MiContaBeta Pro</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+</head>
+<!-- ✅ NUEVO: Clase notranslate en el body -->
+<body class="notranslate">
+
+  <!-- ... el resto<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MiContaBeta Pro</title>
   <!-- ✅ CORREGIDO: Nombre del archivo correcto -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
@@ -269,5 +283,7 @@
   </div>
 
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+
+
 </body>
 </html>
