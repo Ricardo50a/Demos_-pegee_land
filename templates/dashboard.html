@@ -136,6 +136,73 @@
     </ul>
   </main>
 
+  
+  <!-- ===================== pago ===================== -->
+  <!-- Contenedor Principal del Cobro -->
+<div class="checkout-container">
+  
+  <!-- Encabezado: Total a Pagar -->
+  <div class="checkout-header">
+    <span class="label-total">Total a Cobrar</span>
+    <span class="total-amount" id="checkout-total">$ 5.00</span>
+  </div>
+
+  <!-- Selector de Métodos de Pago -->
+  <div class="payment-methods">
+    <h3>Seleccione el método de pago:</h3>
+    
+    <!-- Botón Efectivo -->
+    <button class="payment-btn" onclick="seleccionarPago('Efectivo')">
+      <span class="icon">💵</span>
+      <div class="info">
+        <span class="title">Efectivo</span>
+        <span class="subtitle">Dólares o Bolívares</span>
+      </div>
+      <span class="arrow">›</span>
+    </button>
+
+    <!-- Botón Pago Móvil (Este abre el QR) -->
+    <button class="payment-btn" onclick="mostrarQRPagoMovil()">
+      <span class="icon">📱</span>
+      <div class="info">
+        <span class="title">Pago Móvil</span>
+        <span class="subtitle">Escanea el código QR</span>
+      </div>
+      <span class="arrow">›</span>
+    </button>
+
+    <!-- Botón Punto de Venta (Tarjeta) -->
+    <button class="payment-btn" onclick="seleccionarPago('Tarjeta')">
+      <span class="icon">💳</span>
+      <div class="info">
+        <span class="title">Punto de Venta</span>
+        <span class="subtitle">Débito o Crédito</span>
+      </div>
+      <span class="arrow">›</span>
+    </button>
+  </div>
+
+  <!-- Área Oculta para mostrar el QR de Pago Móvil -->
+  <div id="qr-modal" class="qr-modal" style="display: none;">
+    <div class="qr-content">
+      <h3>Escanea para Pagar</h3>
+      <p>Monto: <strong id="qr-monto">$ 5.00</strong></p>
+      
+      <!-- Aquí se generará el QR -->
+      <div id="qrcode-container" style="margin: 15px auto; width: 200px; height: 200px;"></div>
+      
+      <p class="qr-instructions">Abre tu app bancaria, escanea el código y realiza el Pago Móvil.</p>
+      
+      <!-- Botón para confirmar que el pago ya se realizó -->
+      <button class="btn-confirmar-pago" onclick="confirmarPagoMovil()">
+        ✅ Confirmar Pago Recibido
+      </button>
+      <button class="btn-cancelar" onclick="cerrarQR()">Cancelar</button>
+    </div>
+  </div>
+
+</div>
+
   <!-- ===================== BOTTOM NAV ===================== -->
   <nav class="bottom-nav">
     <button class="nav-btn active" data-target="view-inicio">🏠<span>Inicio</span></button>
