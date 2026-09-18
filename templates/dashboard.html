@@ -1,9 +1,9 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- ✅ Le dice a Google que NO traduzca la página -->
   <meta name="google" content="notranslate">
   <title>MiContaBeta Pro</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
@@ -11,13 +11,11 @@
 </head>
 <body class="notranslate">
 
-  <!-- ===================== HEADER ===================== -->
   <header class="app-header">
     <h1>MiContaBeta <span>Pro</span></h1>
     <button class="btn-logout" title="Salir">⎋</button>
   </header>
 
-  <!-- ===================== FLASH MESSAGES ===================== -->
   {% with messages = get_flashed_messages() %}
     {% if messages %}
       <div class="toast-container">
@@ -30,30 +28,76 @@
     {% endif %}
   {% endwith %}
 
-  <!-- ===================== VISTA: INICIO ===================== -->
-  <main id="view-inicio" class="view active">
-    <section class="kpi-grid">
-      <div class="kpi-card kpi-income">
-        <span class="kpi-label">Ingresos totales</span>
-        <span class="kpi-value">$ {{ "{:,.2f}".format(total_ingresos) }}</span>
-      </div>
-      <div class="kpi-card kpi-expense">
-        <span class="kpi-label">Egresos totales</span>
-        <span class="kpi-value">$ {{ "{:,.2f}".format(total_egresos) }}</span>
-      </div>
-      <div class="kpi-card kpi-balance {{ 'positive' if balance_total >= 0 else 'negative' }}">
-        <span class="kpi-label">Balance general</span>
-        <span class="kpi-value">$ {{ "{:,.2f}".format(balance_total) }}</span>
-      </div>
-    </section>
+<main id="view-inicio" class="view active">
+  <section class="kpi-grid">
+    <div class="kpi-card kpi-income">
+      <span class="kpi-label">Ingresos totales</span>
+      <span class="kpi-value">$ {{ "{:,.2f}".format(total_ingresos) }}</span>
+    </div>
+    <div class="kpi-card kpi-expense">
+      <span class="kpi-label">Egresos totales</span>
+      <span class="kpi-value">$ {{ "{:,.2f}".format(total_egresos) }}</span>
+    </div>
+    <div class="kpi-card kpi-balance">
+      <span class="kpi-label">Balance general</span>
+      <span class="kpi-value">$ {{ "{:,.2f}".format(balance_total) }}</span>
+    </div>
+  </section>
 
-    <section class="quick-actions">
-      <a href="{{ url_for('exportar_excel') }}" class="btn-secondary">📊 Exportar Excel</a>
-      <a href="{{ url_for('exportar_pdf') }}" class="btn-secondary">📄 Exportar PDF</a>
-    </section>
-  </main>
+  <section class="quick-actions">
+    <a href="{{ url_for('exportar_excel') }}" class="btn-secondary">📊 Exportar Excel</a>
+    <a href="{{ url_for('exportar_pdf') }}" class="btn-secondary">📄 Exportar PDF</a>
+  </section>
 
-  <!-- ===================== VISTA: MOVIMIENTOS ===================== -->
+<!-- ✅ Acciones rápidas con funcionalidad -->
+<section class="quick-shortcuts">
+  <h3 class="section-title">Acciones rápidas</h3>
+  <div class="shortcuts-grid">
+    
+    <button class="shortcut-card" onclick="accionNuevaVenta()">
+      <span class="shortcut-icon">💰</span>
+      <span class="shortcut-label">Nueva venta</span>
+    </button>
+    
+    <button class="shortcut-card" onclick="accionNuevoGasto()">
+      <span class="shortcut-icon">📉</span>
+      <span class="shortcut-label">Nuevo gasto</span>
+    </button>
+    
+    <button class="shortcut-card" onclick="accionCierreCaja()">
+      <span class="shortcut-icon">📋</span>
+      <span class="shortcut-label">Cierre de caja</span>
+    </button>
+    
+  </div>
+</section>
+
+  <!-- ✅ NUEVO: Últimas transacciones -->
+  <section class="recent-tx">
+    <h3 class="section-title">Últimas transacciones</h3>
+    <ul class="audit-list">
+      {% for t in transacciones[:5] %}
+      <li class="audit-item">
+        <span class="audit-badge {{ 'badge-income' if t.tipo == 'Ingreso' else 'badge-expense' }}">
+          {{ '↑' if t.tipo == 'Ingreso' else '↓' }}
+        </span>
+        <span class="audit-desc">
+          <strong>{{ t.descripcion }}</strong>
+          <small>{{ t.factura_numero }}</small>
+        </span>
+        <span class="audit-amount {{ 'income' if t.tipo == 'Ingreso' else 'expense' }}">
+          $ {{ "{:,.2f}".format(t.monto) }}
+        </span>
+      </li>
+      {% else %}
+      <li class="audit-item empty">
+        <span class="audit-desc">No hay transacciones registradas aún.</span>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+</main>
+
   <main id="view-movimientos" class="view">
     <div class="search-bar">
       <input type="search" id="search-input" placeholder="Buscar por factura o descripción...">
@@ -108,7 +152,6 @@
     <button id="btn-load-more" class="btn-secondary hidden">Cargar más</button>
   </main>
 
-  <!-- ===================== VISTA: CIERRE / AUDITORÍA ===================== -->
   <main id="view-cierre" class="view">
     {% if balance_mensual %}
     <section class="kpi-grid">
@@ -139,65 +182,64 @@
     </ul>
   </main>
 
-  <!-- ===================== PANTALLA DE COBRO ===================== -->
-  
-<div class="checkout-container" id="checkout-container">
-    
-    <div class="checkout-header">
-      <span class="label-total">Total a Cobrar</span>
-      <span class="total-amount" id="checkout-total">$ 0.00</span>
-    </div>
-
-    <div class="payment-methods">
-      <h3>Seleccione el método de pago:</h3>
+  <!-- PANTALLA DE COBRO -->
+  <div class="checkout-container" id="checkout-container">
+    <div class="checkout-content">
       
-      <button class="payment-btn" onclick="seleccionarPago('Efectivo')">
-        <span class="icon">💵</span>
-        <div class="info">
-          <span class="title">Efectivo</span>
-          <span class="subtitle">Dólares o Bolívares</span>
-        </div>
-        <span class="arrow">›</span>
-      </button>
+      <div class="checkout-header">
+        <span class="label-total">Total a Cobrar</span>
+        <span class="total-amount" id="checkout-total">$ 0.00</span>
+      </div>
 
-      <button class="payment-btn" onclick="mostrarQRPagoMovil()">
-        <span class="icon">📱</span>
-        <div class="info">
-          <span class="title">Pago Móvil</span>
-          <span class="subtitle">Escanea el código QR</span>
-        </div>
-        <span class="arrow">›</span>
-      </button>
+      <div class="payment-methods">
+        <h3>Seleccione el método de pago:</h3>
+        
+        <button class="payment-btn" onclick="seleccionarPago('Efectivo')">
+          <span class="icon">💵</span>
+          <div class="info">
+            <span class="title">Efectivo</span>
+            <span class="subtitle">Dólares o Bolívares</span>
+          </div>
+          <span class="arrow">›</span>
+        </button>
 
-      <button class="payment-btn" onclick="seleccionarPago('Tarjeta')">
-        <span class="icon">💳</span>
-        <div class="info">
-          <span class="title">Punto de Venta</span>
-          <span class="subtitle">Débito o Crédito</span>
-        </div>
-        <span class="arrow">›</span>
-      </button>
+        <button class="payment-btn" onclick="mostrarQRPagoMovil()">
+          <span class="icon">📱</span>
+          <div class="info">
+            <span class="title">Pago Móvil</span>
+            <span class="subtitle">Escanea el código QR</span>
+          </div>
+          <span class="arrow">›</span>
+        </button>
+
+        <button class="payment-btn" onclick="seleccionarPago('Tarjeta')">
+          <span class="icon">💳</span>
+          <div class="info">
+            <span class="title">Punto de Venta</span>
+            <span class="subtitle">Débito o Crédito</span>
+          </div>
+          <span class="arrow">›</span>
+        </button>
+
+        <button class="checkout-cancel" onclick="cerrarCheckout()">Cancelar</button>
+      </div>
+
     </div>
   </div>
 
-  <!-- ===================== MODAL QR ===================== -->
-  <div id="qr-modal" class="qr-modal" style="display: none;">
+  <!-- MODAL QR -->
+  <div id="qr-modal" class="qr-modal">
     <div class="qr-content">
       <h3>Escanea para Pagar</h3>
       <p>Monto: <strong id="qr-monto">$ 0.00</strong></p>
-      
       <div id="qrcode-container" style="margin: 15px auto; width: 200px; height: 200px;"></div>
-      
       <p class="qr-instructions">Abre tu app bancaria, escanea el código y realiza el Pago Móvil.</p>
-      
-      <button class="btn-confirmar-pago" onclick="confirmarPagoMovil()">
-        ✅ Confirmar Pago Recibido
-      </button>
+      <button class="btn-confirmar-pago" onclick="confirmarPagoMovil()">✅ Confirmar Pago Recibido</button>
       <button class="btn-cancelar" onclick="cerrarQR()">Cancelar</button>
     </div>
   </div>
 
-  <!-- ===================== BOTTOM NAV ===================== -->
+  <!-- BOTTOM NAV -->
   <nav class="bottom-nav">
     <button class="nav-btn active" data-target="view-inicio">🏠<span>Inicio</span></button>
     <button class="nav-btn" data-target="view-movimientos">📋<span>Movs</span></button>
@@ -206,7 +248,7 @@
     <button class="nav-btn" id="open-import">⬆️<span>Importar</span></button>
   </nav>
 
-  <!-- ===================== BOTTOM SHEET: NUEVA TRANSACCIÓN ===================== -->
+  <!-- BOTTOM SHEETS -->
   <div class="sheet-backdrop" id="sheet-backdrop"></div>
 
   <div class="bottom-sheet" id="sheet-nueva">
@@ -229,8 +271,7 @@
         </div>
         <div class="form-group">
           <label for="fecha">Fecha</label>
-          <input type="date" id="fecha" name="fecha"
-                 value="{{ now.strftime('%Y-%m-%d') }}">
+          <input type="date" id="fecha" name="fecha" value="{{ now.strftime('%Y-%m-%d') }}">
         </div>
       </div>
 
@@ -250,7 +291,6 @@
     </form>
   </div>
 
-  <!-- ===================== BOTTOM SHEET: IMPORTAR ===================== -->
   <div class="bottom-sheet" id="sheet-import">
     <div class="sheet-header">
       <h3>Importar Excel</h3>
@@ -260,8 +300,7 @@
           enctype="multipart/form-data" class="transaction-form">
       <div class="form-group">
         <label for="archivo_excel">Archivo (.xlsx)</label>
-        <input type="file" id="archivo_excel" name="archivo_excel"
-               accept=".xlsx,.xls" required>
+        <input type="file" id="archivo_excel" name="archivo_excel" accept=".xlsx,.xls" required>
       </div>
       <p class="hint">Columnas requeridas: factura_numero, descripcion, monto, tipo</p>
       <button type="submit" class="btn-primary">Subir e importar</button>
@@ -269,5 +308,3 @@
   </div>
 
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
-</body>
-</html>
