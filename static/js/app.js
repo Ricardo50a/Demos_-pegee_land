@@ -1,4 +1,5 @@
-// ============================================
+
+ // ============================================
 // MiContaBeta Pro - JavaScript Principal
 // ============================================
 
@@ -7,49 +8,58 @@ document.querySelectorAll('.nav-btn[data-target]').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     const targetView = document.getElementById(btn.dataset.target);
     if (targetView) targetView.classList.add('active');
   });
 });
 
-// ============ REFERENCIAS A ELEMENTOS ============
+// ============ REFERENCIAS ============
 const backdrop = document.getElementById('sheet-backdrop');
 const sheetNueva = document.getElementById('sheet-nueva');
 const sheetImport = document.getElementById('sheet-import');
 const checkoutContainer = document.getElementById('checkout-container');
+const qrModal = document.getElementById('qr-modal');
 
 // ============ VARIABLES GLOBALES ============
 let totalAPagar = 0.00;
 let qrGenerator = null;
-let carrito = [];
 
-// ============ FUNCIÓN: CERRAR TODOS LOS MODALES ============
+// ============ ACTUALIZAR TOTAL ============
+function actualizarTotal(nuevoTotal) {
+  totalAPagar = nuevoTotal;
+  const display = document.getElementById('checkout-total');
+  if (display) display.innerText = '$ ' + totalAPagar.toFixed(2);
+}
+
+// ============ CERRAR TODO ============
 function closeAllSheets() {
   if (backdrop) backdrop.classList.remove('active');
   if (sheetNueva) sheetNueva.classList.remove('active');
   if (sheetImport) sheetImport.classList.remove('active');
-  if (checkoutContainer) checkoutContainer.style.display = 'none';
-  resetearApp();
+  if (checkoutContainer) checkoutContainer.classList.remove('active');
 }
 
-// ============ FUNCIÓN: RESETEAR ESTADO ============
-function resetearApp() {
-  carrito = [];
-  totalAPagar = 0.00;
-  const displayTotal = document.getElementById('checkout-total');
-  if (displayTotal) displayTotal.innerText = '$ 0.00';
+function cerrarCheckout() {
+  if (checkoutContainer) checkoutContainer.classList.remove('active');
 }
 
-// ============ BOTÓN "+" (NUEVA TRANSACCIÓN) ============
+// ============ BOTÓN "+" → FORMULARIO VACÍO (INGRESO POR DEFECTO) ============
+// Este botón es para el CONTADOR: abre el formulario manual.
 const openFab = document.getElementById('open-fab');
 if (openFab) {
   openFab.addEventListener('click', () => {
     closeAllSheets();
-    // Abrimos el bottom sheet de nueva transacción
     if (backdrop) backdrop.classList.add('active');
     if (sheetNueva) sheetNueva.classList.add('active');
+    // Resetear a "Ingreso"
+    const radioIngreso = document.getElementById('t-income');
+    if (radioIngreso) radioIngreso.checked = true;
+    // Enfocar el primer campo
+    setTimeout(() => {
+      const inputFactura = document.getElementById('factura_numero');
+      if (inputFactura) inputFactura.focus();
+    }, 300);
   });
 }
 
@@ -69,30 +79,25 @@ document.querySelectorAll('[data-close-sheet]').forEach(b =>
 );
 if (backdrop) backdrop.addEventListener('click', closeAllSheets);
 
-// ============ BUSCADOR EN TIEMPO REAL ============
+// ============ BUSCADOR ============
 const searchInput = document.getElementById('search-input');
 const filterTipo  = document.getElementById('filter-tipo');
 const tbody       = document.getElementById('tx-tbody');
 
 function filterRows() {
   if (!searchInput || !filterTipo || !tbody) return;
-  const q    = searchInput.value.toLowerCase().trim();
+  const q = searchInput.value.toLowerCase().trim();
   const tipo = filterTipo.value;
-
   tbody.querySelectorAll('tr').forEach(tr => {
-    const coincideTexto =
-      (tr.dataset.factura || '').includes(q) ||
-      (tr.dataset.desc || '').includes(q);
+    const coincideTexto = (tr.dataset.factura || '').includes(q) || (tr.dataset.desc || '').includes(q);
     const coincideTipo = !tipo || tr.dataset.tipo === tipo;
-    const visible = coincideTexto && coincideTipo;
-    tr.style.display = visible ? '' : 'none';
+    tr.style.display = (coincideTexto && coincideTipo) ? '' : 'none';
   });
 }
-
 if (searchInput) searchInput.addEventListener('input', filterRows);
-if (filterTipo)  filterTipo.addEventListener('change', filterRows);
+if (filterTipo) filterTipo.addEventListener('change', filterRows);
 
-// ============ PAGINACIÓN "CARGAR MÁS" ============
+// ============ PAGINACIÓN ============
 const PAGE_SIZE = 20;
 const loadMoreBtn = document.getElementById('btn-load-more');
 let shown = PAGE_SIZE;
@@ -104,20 +109,14 @@ function applyPagination() {
     if (i >= shown) tr.classList.add('hidden');
     else tr.classList.remove('hidden');
   });
-  if (loadMoreBtn) {
-    loadMoreBtn.classList.toggle('hidden', shown >= rows.length);
-  }
+  if (loadMoreBtn) loadMoreBtn.classList.toggle('hidden', shown >= rows.length);
 }
-
 if (loadMoreBtn) {
-  loadMoreBtn.addEventListener('click', () => {
-    shown += PAGE_SIZE;
-    applyPagination();
-  });
+  loadMoreBtn.addEventListener('click', () => { shown += PAGE_SIZE; applyPagination(); });
   applyPagination();
 }
 
-// ============ AUTO-OCULTAR TOASTS ============
+// ============ TOASTS ============
 setTimeout(() => {
   document.querySelectorAll('.toast').forEach(t => {
     t.style.transition = 'opacity .4s';
@@ -126,50 +125,75 @@ setTimeout(() => {
   });
 }, 4000);
 
-// ============ LÓGICA DE COBRO ============
+// ============================================
+// ACCIONES RÁPIDAS - CADA UNA HACE ALGO DISTINTO
+// ============================================
 
-// Actualizar el monto en la pantalla
-function actualizarTotal(nuevoTotal) {
-  totalAPagar = nuevoTotal;
-  const display = document.getElementById('checkout-total');
-  if (display) display.innerText = `$ ${totalAPagar.toFixed(2)}`;
+// 1. COBRAR / NUEVA VENTA → ABRE DIRECTO EL CHECKOUT (SIN FORMULARIO)
+// El usuario toca → aparece la pantalla de cobro con métodos de pago.
+// No escribe nada, solo toca "Pago Móvil" o "Efectivo" y listo.
+function accionNuevaVenta() {
+  closeAllSheets();
+  // El total vendría de tu carrito real. Por ahora, ejemplo de $5.
+  actualizarTotal(5.00);
+  if (checkoutContainer) {
+    checkoutContainer.classList.add('active');
+  }
 }
 
-// Métodos de pago directos (Efectivo y Tarjeta)
+// 2. NUEVO GASTO → FORMULARIO DIRECTO CON EGRESO SELECCIONADO
+function accionNuevoGasto() {
+  closeAllSheets();
+  if (backdrop) backdrop.classList.add('active');
+  if (sheetNueva) sheetNueva.classList.add('active');
+  // Preseleccionamos "Egreso"
+  const radioEgreso = document.getElementById('t-expense');
+  if (radioEgreso) {
+    radioEgreso.checked = true;
+    radioEgreso.dispatchEvent(new Event('change'));
+  }
+  setTimeout(() => {
+    const inputFactura = document.getElementById('factura_numero');
+    if (inputFactura) inputFactura.focus();
+  }, 300);
+}
+
+// 3. CIERRE DE CAJA → NAVEGA A LA VISTA DE CIERRE/AUDITORÍA
+function accionCierreCaja() {
+  closeAllSheets();
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const btnCierre = document.querySelector('.nav-btn[data-target="view-cierre"]');
+  if (btnCierre) btnCierre.classList.add('active');
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const viewCierre = document.getElementById('view-cierre');
+  if (viewCierre) viewCierre.classList.add('active');
+}
+
+// ============ PAGOS ============
 function seleccionarPago(metodo) {
   if (metodo === 'Efectivo') {
-    alert(`Cobrando $${totalAPagar.toFixed(2)} en Efectivo. ¡Listo!`);
-    finalizarVenta(metodo);
-  } 
-  else if (metodo === 'Tarjeta') {
+    // Aquí ya no pide nada. Cierra la venta directo.
+    finalizarVenta('Efectivo');
+  } else if (metodo === 'Tarjeta') {
     const voucher = prompt("Ingrese el número de voucher de la máquina POS:");
     if (voucher) {
-      alert(`Pago con Tarjeta registrado. Voucher: ${voucher}`);
       finalizarVenta('Tarjeta', voucher);
     }
   }
 }
 
-// Pago Móvil (Generar el QR)
 function mostrarQRPagoMovil() {
-  const qrModal = document.getElementById('qr-modal');
-  if (qrModal) qrModal.style.display = 'flex';
-  
+  if (!qrModal) return;
+  qrModal.classList.add('active');
+
   const qrMonto = document.getElementById('qr-monto');
-  if (qrMonto) qrMonto.innerText = `$ ${totalAPagar.toFixed(2)}`;
+  if (qrMonto) qrMonto.innerText = '$ ' + totalAPagar.toFixed(2);
 
   const qrContainer = document.getElementById('qrcode-container');
   if (!qrContainer) return;
   qrContainer.innerHTML = '';
-  
-  const datosPagoMovil = {
-    banco: "0102",
-    telefono: "04141234567",
-    cedula: "V-12345678",
-    monto: totalAPagar.toFixed(2)
-  };
 
-  const qrData = `banco=${datosPagoMovil.banco}&telefono=${datosPagoMovil.telefono}&cedula=${datosPagoMovil.cedula}&monto=${datosPagoMovil.monto}`;
+  const qrData = 'banco=0102&telefono=04141234567&cedula=V-12345678&monto=' + totalAPagar.toFixed(2);
 
   if (typeof QRCode !== 'undefined') {
     qrGenerator = new QRCode(qrContainer, {
@@ -181,35 +205,29 @@ function mostrarQRPagoMovil() {
       correctLevel: QRCode.CorrectLevel.H
     });
   } else {
-    console.error("La librería QRCode no está cargada.");
-    alert("Error: No se pudo generar el código QR.");
+    alert("Error: La librería QR no está cargada.");
   }
 }
 
-// Confirmar pago móvil
 function confirmarPagoMovil() {
-  const referencia = prompt("Ingrese los últimos 4 dígitos de la referencia del Pago Móvil:");
+  const referencia = prompt("Ingrese los últimos 4 dígitos de la referencia:");
   if (referencia) {
-    alert(`Pago Móvil confirmado. Referencia: ${referencia}`);
     cerrarQR();
     finalizarVenta('Pago Móvil', referencia);
-  } else {
-    alert("Debe ingresar la referencia para confirmar el pago.");
   }
 }
 
-// Cerrar el modal del QR
 function cerrarQR() {
-  const qrModal = document.getElementById('qr-modal');
-  if (qrModal) qrModal.style.display = 'none';
+  if (qrModal) qrModal.classList.remove('active');
   if (qrGenerator) {
     qrGenerator.clear();
     qrGenerator = null;
   }
 }
 
-// Función final: guardar venta y cerrar todo
-function finalizarVenta(metodoPago, referencia = '') {
+// ============ FINALIZAR VENTA ============
+function finalizarVenta(metodoPago, referencia) {
+  referencia = referencia || '';
   const ventaData = {
     total: totalAPagar,
     metodo_pago: metodoPago,
@@ -217,24 +235,39 @@ function finalizarVenta(metodoPago, referencia = '') {
     fecha: new Date().toISOString()
   };
 
-  console.log("Enviando a Django:", ventaData);
-  
-  // ⚠️ AQUÍ CONECTARÁS CON TU BACKEND EN DJANGO
-  /*
-  fetch('/api/guardar-venta/', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(ventaData)
-  })
-  .then(res => res.json())
-  .then(data => {
-    alert(`¡Venta registrada! Total: $${ventaData.total.toFixed(2)}`);
+  console.log("Venta registrada:", ventaData);
+
+  // Aquí conectarás con tu SMS o tu backend para autorizar el pago
+  // Por ahora, simulamos la autorización
+  setTimeout(() => {
     closeAllSheets();
-  })
-  .catch(err => console.error('Error:', err));
-  */
+    // Un solo mensaje corto, no dos alerts
+    const mensaje = metodoPago === 'Efectivo'
+      ? '✅ Venta en efectivo: $' + ventaData.total.toFixed(2)
+      : '✅ Venta autorizada por ' + metodoPago + ': $' + ventaData.total.toFixed(2);
+    
+    // Usamos un toast en lugar de un alert (menos intrusivo)
+    mostrarToast(mensaje, 'success');
+  }, 300);
+}
+
+// ============ TOAST DE NOTIFICACIÓN (MEJOR QUE ALERT) ============
+function mostrarToast(mensaje, tipo) {
+  const container = document.querySelector('.toast-container') || (() => {
+    const c = document.createElement('div');
+    c.className = 'toast-container';
+    document.body.appendChild(c);
+    return c;
+  })();
   
-  // Simulación por ahora:
-  alert(`¡Venta registrada! Total: $${ventaData.total.toFixed(2)} - Método: ${metodoPago}`);
-  closeAllSheets();
+  const toast = document.createElement('div');
+  toast.className = 'toast toast-' + (tipo || 'success');
+  toast.innerText = mensaje;
+  container.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.style.transition = 'opacity .4s';
+    toast.style.opacity = '0';
+    setTimeout(() => toast.remove(), 400);
+  }, 3000);
 }
