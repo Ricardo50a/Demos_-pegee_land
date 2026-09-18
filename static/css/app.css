@@ -401,20 +401,25 @@ body {
   cursor: pointer;
 }
 
-/* ---------- PANTALLA DE COBRO ---------- */
+/* ---------- PANTALLA DE COBRO (Modal) ---------- */
 .checkout-container {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5); /* Fondo oscuro semi-transparente */
-  z-index: 200; /* Por encima de todo, pero debajo del modal QR (1000) */
-  display: flex;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 200;
+  display: none; /* Oculto por defecto */
   align-items: center;
   justify-content: center;
   padding: 20px;
   overflow-y: auto;
+}
+
+/* Cuando se abre, usamos flex */
+.checkout-container.active {
+  display: flex;
 }
 
 .checkout-container .checkout-header,
