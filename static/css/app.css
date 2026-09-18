@@ -43,12 +43,8 @@ body {
 }
 
 /* VISTAS */
-.view { display: none; padding: 16px; animation: fade .2s ease; }
+.view { display: none; padding: 16px; }
 .view.active { display: block; }
-@keyframes fade {
-  from { opacity: 0; transform: translateY(4px); }
-  to   { opacity: 1; transform: none; }
-}
 
 /* KPI CARDS */
 .kpi-grid {
@@ -276,15 +272,10 @@ body {
   background: var(--neutral-900); color: white;
   padding: 12px 20px; border-radius: 8px;
   font-size: 14px; box-shadow: var(--shadow-md);
-  animation: slideDown .3s ease;
   max-width: 90vw;
 }
 .toast-success { background: var(--success); }
 .toast-error   { background: var(--danger); }
-@keyframes slideDown {
-  from { opacity: 0; transform: translate(-50%, -8px); }
-  to   { opacity: 1; transform: translate(-50%, 0); }
-}
 
 /* AUDITORÍA */
 .section-title {
@@ -305,7 +296,6 @@ body {
 }
 .audit-item time { margin-left: auto; color: var(--neutral-500); }
 
-/* UTILIDADES */
 .hidden { display: none !important; }
 .hint {
   font-size: 12px; color: var(--neutral-500);
@@ -313,7 +303,7 @@ body {
 }
 
 /* ==========================================================
-   PANTALLA DE COBRO (MODAL)
+   PANTALLA DE COBRO - DISEÑO COMPACTO Y MODERNO
    ========================================================== */
 .checkout-container {
   position: fixed;
@@ -321,82 +311,105 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
   z-index: 200;
   display: none;
-  align-items: center;
+  align-items: flex-end; /* Modal pegado abajo */
   justify-content: center;
-  padding: 20px;
-  overflow-y: auto;
 }
 
 .checkout-container.active {
   display: flex;
 }
 
-.checkout-container .checkout-header,
-.checkout-container .payment-methods {
+.checkout-content {
   background: #ffffff;
-  border-radius: 16px;
+  border-radius: 24px 24px 0 0;
   padding: 20px;
   width: 100%;
-  max-width: 400px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  max-width: 500px;
+  max-height: 85vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease;
 }
 
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+/* Header compacto del checkout */
 .checkout-header {
   text-align: center;
-  margin-bottom: 16px;
   padding: 16px;
-  background: #f0fdf4;
-  border-radius: 12px;
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  border-radius: 16px;
+  margin-bottom: 20px;
+  color: white;
 }
 .label-total {
   display: block;
-  font-size: 14px;
-  color: #166534;
-  font-weight: 600;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
   margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 .total-amount {
-  font-size: 36px;
+  font-size: 32px;
   font-weight: 800;
-  color: #15803d;
+  color: #ffffff;
 }
 
 .payment-methods h3 {
-  font-size: 16px;
+  font-size: 15px;
   color: #374151;
   margin-bottom: 12px;
+  font-weight: 600;
 }
 
+/* Botones de método de pago */
 .payment-btn {
   display: flex;
   align-items: center;
   width: 100%;
-  padding: 16px;
+  padding: 14px;
   background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 14px;
   margin-bottom: 10px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.15s;
   text-align: left;
 }
 .payment-btn:active {
   background: #f3f4f6;
   transform: scale(0.98);
 }
-.payment-btn .icon { font-size: 28px; margin-right: 16px; }
+.payment-btn .icon { font-size: 26px; margin-right: 14px; }
 .payment-btn .info { display: flex; flex-direction: column; flex: 1; }
 .payment-btn .title {
-  font-size: 16px; font-weight: 600; color: #111827;
+  font-size: 15px; font-weight: 600; color: #111827;
 }
 .payment-btn .subtitle {
   font-size: 12px; color: #6b7280;
 }
 .payment-btn .arrow {
-  font-size: 24px; color: #9ca3af; font-weight: 300;
+  font-size: 22px; color: #9ca3af; font-weight: 300;
+}
+
+/* Botón cancelar en el checkout */
+.checkout-cancel {
+  width: 100%;
+  padding: 12px;
+  background: transparent;
+  color: #6b7280;
+  border: none;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 6px;
 }
 
 /* MODAL QR */
@@ -404,26 +417,26 @@ body {
   position: fixed;
   top: 0; left: 0; width: 100%; height: 100%;
   background: rgba(0, 0, 0, 0.6);
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  padding: 20px;
 }
 .qr-content {
   background: #ffffff;
   padding: 24px;
-  border-radius: 16px;
+  border-radius: 20px;
   text-align: center;
-  width: 90%;
+  width: 100%;
   max-width: 350px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
-.qr-content h3 { margin-top: 0; color: #111827; }
+.qr-content h3 { margin-bottom: 8px; color: #111827; font-size: 18px; }
 .qr-content p { font-size: 14px; color: #4b5563; margin: 8px 0; }
 .qr-instructions {
-  font-size: 12px !important;
-  color: #9ca3af !important;
-  margin-bottom: 16px !important;
+  font-size: 12px;
+  color: #9ca3af;
+  margin: 12px 0 16px 0;
 }
 
 .btn-confirmar-pago {
@@ -432,7 +445,7 @@ body {
   background: #10b981;
   color: white;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
