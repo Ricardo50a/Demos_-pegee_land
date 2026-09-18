@@ -128,14 +128,21 @@ setTimeout(() => {
 // ============================================
 // ACCIONES RÁPIDAS - CADA UNA HACE ALGO DISTINTO
 // ============================================
-
-// 1. COBRAR / NUEVA VENTA → ABRE DIRECTO EL CHECKOUT (SIN FORMULARIO)
-// El usuario toca → aparece la pantalla de cobro con métodos de pago.
-// No escribe nada, solo toca "Pago Móvil" o "Efectivo" y listo.
 function accionNuevaVenta() {
   closeAllSheets();
-  // El total vendría de tu carrito real. Por ahora, ejemplo de $5.
-  actualizarTotal(5.00);
+  
+  // Pedir el monto al usuario
+  const montoIngresado = prompt("Ingrese el monto a cobrar:", "");
+  
+  // Validar que sea un número válido
+  const monto = parseFloat(montoIngresado);
+  if (isNaN(monto) || monto <= 0) {
+    mostrarToast("❌ Monto no válido", "error");
+    return;
+  }
+
+  // Asignar el monto y abrir checkout
+  actualizarTotal(monto);
   if (checkoutContainer) {
     checkoutContainer.classList.add('active');
   }
