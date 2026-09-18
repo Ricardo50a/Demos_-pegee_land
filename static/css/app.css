@@ -2,7 +2,6 @@
    MiContaBeta Pro - Hoja de Estilos
    ============================================ */
 
-/* ============ VARIABLES GLOBALES ============ */
 :root {
   --primary: #2563eb;
   --primary-dark: #1d4ed8;
@@ -28,7 +27,7 @@ body {
   padding-bottom: 80px;
 }
 
-/* ============ HEADER ============ */
+/* HEADER */
 .app-header {
   display: flex; justify-content: space-between; align-items: center;
   padding: 14px 18px;
@@ -43,7 +42,7 @@ body {
   color: var(--neutral-500); cursor: pointer;
 }
 
-/* ============ VISTAS ============ */
+/* VISTAS */
 .view { display: none; padding: 16px; animation: fade .2s ease; }
 .view.active { display: block; }
 @keyframes fade {
@@ -51,7 +50,7 @@ body {
   to   { opacity: 1; transform: none; }
 }
 
-/* ============ KPI CARDS ============ */
+/* KPI CARDS */
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -77,10 +76,10 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* ============ QUICK ACTIONS ============ */
+/* QUICK ACTIONS */
 .quick-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 
-/* ============ SEARCH & FILTERS ============ */
+/* SEARCH & FILTERS */
 .search-bar { display: flex; gap: 8px; margin-bottom: 12px; }
 .search-bar input {
   flex: 1; padding: 12px 14px;
@@ -101,7 +100,7 @@ body {
 }
 .inline-form { display: flex; gap: 8px; }
 
-/* ============ TABLE ============ */
+/* TABLE */
 .custom-table {
   width: 100%; border-collapse: collapse;
   background: white;
@@ -121,12 +120,12 @@ body {
 .custom-table tr:last-child td { border-bottom: none; }
 .text-right { text-align: right !important; }
 
-/* ============ AMOUNTS ============ */
+/* AMOUNTS */
 .amount { font-variant-numeric: tabular-nums; font-weight: 600; }
 .amount.income  { color: var(--success); }
 .amount.expense { color: var(--danger); }
 
-/* ============ BADGES ============ */
+/* BADGES */
 .badge {
   padding: 4px 8px; border-radius: 4px;
   font-size: 12px; font-weight: 500;
@@ -134,7 +133,7 @@ body {
 .badge-income  { background: #e6f4ea; color: #137333; }
 .badge-expense { background: #fce8e6; color: #c5221f; }
 
-/* ============ BOTONES ============ */
+/* BOTONES */
 .btn-primary, .btn-secondary, .btn-filter {
   border: none; cursor: pointer;
   border-radius: var(--radius);
@@ -160,7 +159,7 @@ body {
   font-size: 16px; padding: 4px;
 }
 
-/* ============ BOTTOM NAV ============ */
+/* BOTTOM NAV */
 .bottom-nav {
   position: fixed; bottom: 0; left: 0; right: 0;
   display: flex; justify-content: space-around; align-items: center;
@@ -191,7 +190,7 @@ body {
 }
 .nav-btn.fab:hover { background: var(--primary-dark); }
 
-/* ============ BOTTOM SHEET ============ */
+/* BOTTOM SHEET */
 .sheet-backdrop {
   position: fixed; inset: 0;
   background: rgba(0, 0, 0, .4);
@@ -225,7 +224,7 @@ body {
   color: var(--neutral-500); cursor: pointer;
 }
 
-/* ============ FORM ============ */
+/* FORM */
 .form-row { display: flex; gap: 12px; }
 .form-group {
   flex: 1; display: flex; flex-direction: column; margin-bottom: 14px;
@@ -249,7 +248,7 @@ body {
   box-shadow: 0 0 0 3px rgba(37, 99, 235, .1);
 }
 
-/* ============ TOGGLE ============ */
+/* TOGGLE */
 .toggle-container {
   display: flex; background: var(--neutral-100);
   padding: 4px; border-radius: var(--radius);
@@ -266,7 +265,7 @@ body {
 #t-income:checked + .toggle-label.income  { background: var(--success); color: white; }
 #t-expense:checked + .toggle-label.expense { background: var(--danger);  color: white; }
 
-/* ============ TOASTS ============ */
+/* TOASTS */
 .toast-container {
   position: fixed; top: 70px; left: 50%;
   transform: translateX(-50%);
@@ -287,7 +286,7 @@ body {
   to   { opacity: 1; transform: translate(-50%, 0); }
 }
 
-/* ============ AUDITORÍA ============ */
+/* AUDITORÍA */
 .section-title {
   font-size: 15px; margin: 20px 0 10px;
   color: var(--neutral-700);
@@ -306,7 +305,7 @@ body {
 }
 .audit-item time { margin-left: auto; color: var(--neutral-500); }
 
-/* ============ UTILIDADES ============ */
+/* UTILIDADES */
 .hidden { display: none !important; }
 .hint {
   font-size: 12px; color: var(--neutral-500);
@@ -314,7 +313,7 @@ body {
 }
 
 /* ==========================================================
-   PANTALLA DE COBRO (MODAL) - ÚNICA DEFINICIÓN
+   PANTALLA DE COBRO (MODAL)
    ========================================================== */
 .checkout-container {
   position: fixed;
@@ -324,19 +323,17 @@ body {
   height: 100%;
   background: rgba(0, 0, 0, 0.5);
   z-index: 200;
-  display: none; /* Oculto por defecto */
+  display: none;
   align-items: center;
   justify-content: center;
   padding: 20px;
   overflow-y: auto;
 }
 
-/* Cuando tiene la clase .active, se muestra */
 .checkout-container.active {
   display: flex;
 }
 
-/* Contenido interno centrado */
 .checkout-container .checkout-header,
 .checkout-container .payment-methods {
   background: #ffffff;
@@ -347,7 +344,6 @@ body {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
 }
 
-/* Header del checkout */
 .checkout-header {
   text-align: center;
   margin-bottom: 16px;
@@ -368,14 +364,12 @@ body {
   color: #15803d;
 }
 
-/* Título de métodos de pago */
 .payment-methods h3 {
   font-size: 16px;
   color: #374151;
   margin-bottom: 12px;
 }
 
-/* Botones de método de pago */
 .payment-btn {
   display: flex;
   align-items: center;
@@ -405,9 +399,7 @@ body {
   font-size: 24px; color: #9ca3af; font-weight: 300;
 }
 
-/* ==========================================================
-   MODAL DEL CÓDIGO QR
-   ========================================================== */
+/* MODAL QR */
 .qr-modal {
   position: fixed;
   top: 0; left: 0; width: 100%; height: 100%;
@@ -434,7 +426,6 @@ body {
   margin-bottom: 16px !important;
 }
 
-/* Botones del modal QR */
 .btn-confirmar-pago {
   width: 100%;
   padding: 14px;
@@ -458,4 +449,4 @@ body {
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  }
+}
