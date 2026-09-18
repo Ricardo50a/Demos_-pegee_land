@@ -462,16 +462,30 @@ body {
 }
 
 
+/* ==========================================
+   ACCIONES RÁPIDAS EN HORIZONTAL (3 columnas)
+   ========================================== *//* ==========================================
+   ACCIONES RÁPIDAS EN HORIZONTAL (3 columnas forzadas)
+   ========================================== */
+.shortcuts-grid {
+  display: flex;             /* 🔑 Flexbox en vez de Grid */
+  flex-direction: row;       /* En fila horizontal */
+  justify-content: space-between;
+  align-items: stretch;      /* 🔑 Fuerza a que todas tengan la MISMA altura */
+  gap: 8px;
+  margin-bottom: 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
 
-/* ==========================================================
-   SECCIONES EXTRA DE Estilo INICIO
-   ========================================================== */
-
+/* Ajuste de las tarjetas */
 .shortcut-card {
+  flex: 1 1 0;               /* 🔑 Clave: todas crecen y se encogen por igual */
+  min-width: 0;              /* 🔑 Evita que el texto largo estire la tarjeta */
   background: white;
   border: 1px solid var(--neutral-200);
   border-radius: 14px;
-  padding: 14px 8px;
+  padding: 10px 4px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -480,28 +494,38 @@ body {
   cursor: pointer;
   transition: all .15s;
   box-shadow: var(--shadow-sm);
-  min-height: 100px;
+  text-align: center;
+  box-sizing: border-box;
+  overflow: hidden;          /* 🔑 Corta cualquier cosa que se salga */
 }
+
 .shortcut-card:active {
   transform: scale(0.97);
   background: var(--neutral-100);
   border-color: var(--primary);
 }
+
 .shortcut-icon {
-  font-size: 28px;
+  font-size: 24px;
   line-height: 1;
+  display: block;
+  text-align: center;
 }
+
 .shortcut-label {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   color: var(--neutral-900);
   text-align: center;
-  line-height: 1.2;
-}
-.shortcut-label small {
+  line-height: 1.15;
   display: block;
-  font-size: 10px;
-  font-weight: 500;
-  color: var(--neutral-500);
-  margin-top: 2px;
+  width: 100%;
+  word-wrap: break-word;     /* 🔑 Rompe palabras largas si es necesario */
+}
+
+/* En pantallas muy angostas, 2 columnas */
+@media (max-width: 360px) {
+  .shortcuts-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
